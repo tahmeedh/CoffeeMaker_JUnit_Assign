@@ -1,159 +1,141 @@
 package edu.ncsu.csc326.coffeemaker;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
-import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import edu.ncsu.csc326.coffeemaker.exceptions.InventoryException;
 import edu.ncsu.csc326.coffeemaker.exceptions.RecipeException;
 
-public class CoffeeMakerTest2 {
-	
-	private Recipe recipe;
-	private Recipe[] recipeArray;
+
+public class CoffeeMakerTest {
+
+	/**
+	 * The object under test.
+	 */
 	private CoffeeMaker coffeeMaker;
-	
+
+	// Sample recipes to use in testing.
+	private Recipe recipe1;
+	private Recipe recipe2;
+	private Recipe recipe3;
+	private Recipe recipe4;
+
+	/**
+	 * Initializes some recipes to test with and the {@link CoffeeMaker}
+	 * object we wish to test.
+	 *
+	 * @throws RecipeException  if there was an error parsing the ingredient
+	 * 		amount when setting up the recipe.
+	 */
 	@Before
-	public void setUp() throws Exception {
-		this.recipeArray = new Recipe[4];
-		this.recipe = new Recipe();
-		this.recipe.setName("Test Recipe");
-		this.recipe.setPrice("4");
-		this.recipe.setAmtCoffee("5");
-		this.recipe.setAmtMilk("5");
-		this.recipe.setAmtSugar("5");
-		this.recipeArray[0] = this.recipe;
-		this.coffeeMaker = new CoffeeMaker();
-		this.coffeeMaker.addRecipe(recipe);
+	public void setUp() throws RecipeException {
+		coffeeMaker = new CoffeeMaker();
+
+		//Set up for r1
+		recipe1 = new Recipe();
+		recipe1.setName("Coffee");
+		recipe1.setAmtChocolate("0");
+		recipe1.setAmtCoffee("3");
+		recipe1.setAmtMilk("1");
+		recipe1.setAmtSugar("1");
+		recipe1.setPrice("50");
+
+		//Set up for r2
+		recipe2 = new Recipe();
+		recipe2.setName("Mocha");
+		recipe2.setAmtChocolate("20");
+		recipe2.setAmtCoffee("3");
+		recipe2.setAmtMilk("1");
+		recipe2.setAmtSugar("1");
+		recipe2.setPrice("75");
+
+		//Set up for r3
+		recipe3 = new Recipe();
+		recipe3.setName("Latte");
+		recipe3.setAmtChocolate("0");
+		recipe3.setAmtCoffee("3");
+		recipe3.setAmtMilk("3");
+		recipe3.setAmtSugar("1");
+		recipe3.setPrice("100");
+
+		//Set up for r4
+		recipe4 = new Recipe();
+		recipe4.setName("Hot Chocolate");
+		recipe4.setAmtChocolate("4");
+		recipe4.setAmtCoffee("0");
+		recipe4.setAmtMilk("1");
+		recipe4.setAmtSugar("1");
+		recipe4.setPrice("65");
 	}
 
-	@After
-	public void tearDown() throws Exception {
-		this.recipeArray = null;
-		this.recipe = null;
-		this.coffeeMaker = null;
-	}
 
+	/**
+	 * Given a coffee maker with the default inventory
+	 * When we add inventory with well-formed quantities
+	 * Then we do not get an exception trying to read the inventory quantities.
+	 *
+	 * @throws InventoryException  if there was an error parsing the quanity
+	 * 		to a positive integer.
+	 */
 	@Test
-	public void testCoffeeMaker() {
-		Recipe[] expectedRecipeArray = this.recipeArray;
-		Recipe[] actualRecipeArray = this.coffeeMaker.getRecipes();
-		String expectedInventoryString = "Coffee: 15\nMilk: 15\nSugar: 15\nChocolate: 15\n";
-		String actualInventoryString = this.coffeeMaker.checkInventory();
-		assertArrayEquals(expectedRecipeArray, actualRecipeArray);
-		assertEquals(expectedInventoryString, actualInventoryString);
+	public void testAddInventory() throws InventoryException {
+		coffeeMaker.addInventory("4","7","0","9");
 	}
 
-	@Test
-	public void testAddRecipe() {
-		this.coffeeMaker.addRecipe(recipe);
-		Recipe[] expectedRecipeArray = this.recipeArray;
-		Recipe[] actualRecipeArray = this.coffeeMaker.getRecipes();
-		assertArrayEquals(expectedRecipeArray, actualRecipeArray);
+	/**
+	 * Given a coffee maker with the default inventory
+	 * When we add inventory with malformed quantities (i.e., a negative
+	 * quantity and a non-numeric string)
+	 * Then we get an inventory exception
+	 *
+	 * @throws InventoryException  if there was an error parsing the quanity
+	 * 		to a positive integer.
+	 */
+	@Test(expected = InventoryException.class)
+	public void testAddInventoryException() throws InventoryException {
+		coffeeMaker.addInventory("4", "-1", "-6", "3");
 	}
 
-	@Test
-	public void testDeleteRecipe() {
-		String expectedRecipeName = this.recipeArray[0].getName();
-		String actualRecipeName = this.coffeeMaker.deleteRecipe(0);
-		this.recipeArray[0] = null;
-		Recipe[] expectedRecipeArray = this.recipeArray;
-		Recipe[] actualRecipeArray = this.coffeeMaker.getRecipes();
-		assertEquals(expectedRecipeName, actualRecipeName);
-		assertArrayEquals(expectedRecipeArray, actualRecipeArray);
-	}
-
-	@Test
-	public void testEditRecipe() {
-		Recipe newRecipe = new Recipe();
-		newRecipe.setName("Test New Recipe");
-		String expectedOldRecipeName = this.recipeArray[0].getName();
-		String actualOldRecipeName = this.coffeeMaker.editRecipe(0, newRecipe);
-		this.recipeArray[0] = newRecipe;
-		Recipe[] expectedRecipeArray = this.recipeArray;
-		Recipe[] actualRecipeArray = this.coffeeMaker.getRecipes();
-		assertEquals(expectedOldRecipeName, actualOldRecipeName);
-		assertArrayEquals(expectedRecipeArray, actualRecipeArray);
-	}
-
-	@Test
-	public void testAddInventory() {
-		try {
-			this.coffeeMaker.addInventory("15", "15", "15", "15");
-		} catch (InventoryException e) {
-			e.printStackTrace();
-			fail();
-		}
-		String expectedInventoryString = "Coffee: 30\nMilk: 30\nSugar: 30\nChocolate: 30\n";
-		String actualInventoryString = this.coffeeMaker.checkInventory();
-		assertEquals(expectedInventoryString, actualInventoryString);
-	}
-
-	@Test
-	public void testCheckInventory() {
-		String expectedInventoryString = "Coffee: 15\nMilk: 15\nSugar: 15\nChocolate: 15\n";
-		String actualInventoryString = this.coffeeMaker.checkInventory();
-		assertEquals(expectedInventoryString, actualInventoryString);
-	}
-
+	/**
+	 * Given a coffee maker with one valid recipe
+	 * When we make coffee, selecting the valid recipe and paying more than
+	 * 		the coffee costs
+	 * Then we get the correct change back.
+	 */
 	@Test
 	public void testMakeCoffee() {
-		int expectedInt = 1;
-		int actualInt = this.coffeeMaker.makeCoffee(0, 5);
-		String expectedInventoryString = "Coffee: 10\nMilk: 10\nSugar: 10\nChocolate: 15\n";
-		String actualInventoryString = this.coffeeMaker.checkInventory();
-		assertEquals(expectedInt, actualInt);
-		assertEquals(expectedInventoryString, actualInventoryString);
-	}
-	
-	@Test
-	public void testMakeCoffeeInsufficientInventory() {
-		Recipe badRecipe = new Recipe();
-		badRecipe.setName("Test Bad Recipe");
-		try {
-			badRecipe.setPrice("4");
-			badRecipe.setAmtCoffee("20");
-		} catch (RecipeException e) {
-			fail();
-		}
-		this.coffeeMaker.addRecipe(badRecipe);
-		int expectedInt = 5;
-		int actualInt = this.coffeeMaker.makeCoffee(1, 5);
-		String expectedInventoryString = "Coffee: 15\nMilk: 15\nSugar: 15\nChocolate: 15\n";
-		String actualInventoryString = this.coffeeMaker.checkInventory();
-		assertEquals(expectedInt, actualInt);
-		assertEquals(expectedInventoryString, actualInventoryString);
-	}
-	
-	@Test
-	public void testMakeCoffeeInvalidIndex() {
-		int expectedInt = 4;
-		int actualInt = this.coffeeMaker.makeCoffee(1, 4);
-		String expectedInventoryString = "Coffee: 15\nMilk: 15\nSugar: 15\nChocolate: 15\n";
-		String actualInventoryString = this.coffeeMaker.checkInventory();
-		assertEquals(expectedInt, actualInt);
-		assertEquals(expectedInventoryString, actualInventoryString);
+		coffeeMaker.addRecipe(recipe1);
+		assertEquals(25, coffeeMaker.makeCoffee(0, 75));
 	}
 
-	@Test
-	public void testMakeCoffeeInvalidAmtPaid() {
-		int expectedInt = 2;
-		int actualInt = this.coffeeMaker.makeCoffee(0, 2);
-		String expectedInventoryString = "Coffee: 15\nMilk: 15\nSugar: 15\nChocolate: 15\n";
-		String actualInventoryString = this.coffeeMaker.checkInventory();
-		assertEquals(expectedInt, actualInt);
-		assertEquals(expectedInventoryString, actualInventoryString);
-	}
-	
-	@Test
-	public void testGetRecipes() {
-		Recipe[] expected = this.recipeArray;
-		Recipe[] actual = this.coffeeMaker.getRecipes();
-		assertArrayEquals(expected, actual);
-	}
 
+	@Test
+	public void testAddRecipe1()
+	{
+		assertEquals(true,coffeeMaker.addRecipe(recipe1));
+		assertEquals(true,coffeeMaker.addRecipe(recipe2));
+		assertEquals(true,coffeeMaker.addRecipe(recipe3));
+		assertEquals(false,coffeeMaker.addRecipe(recipe4));
+	}
+	@Test
+	public void testMakeCoffee1() {
+		coffeeMaker.addRecipe(recipe1);
+		coffeeMaker.addRecipe(recipe2);
+		coffeeMaker.addRecipe(recipe3);
+		coffeeMaker.addRecipe(recipe4);
+		assertEquals(75, coffeeMaker.makeCoffee(4, 75));
+	}
+	@Test
+	public void testDeleteRecipe4()
+	{   coffeeMaker.addRecipe(recipe1);
+		coffeeMaker.addRecipe(recipe2);
+		coffeeMaker.addRecipe(recipe3);
+		coffeeMaker.addRecipe(recipe4);
+		assertEquals("Coffee",coffeeMaker.deleteRecipe(0));
+		assertEquals("Mocha",coffeeMaker.deleteRecipe(1));
+		assertEquals("Latte",coffeeMaker.deleteRecipe(2));
+		assertEquals(null,coffeeMaker.deleteRecipe(3));
+	}
 }
